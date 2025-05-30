@@ -42,7 +42,7 @@ const options = {
         './routes/webhooks.js',
         './routes/googleauth.js',
         './routes/metricLogs.js',
-        './routes/RuleBreachLog.js',
+        './routes/ruleBreachLog.js',
         './routes/exportRoutes.js',
         './routes/importRoutes.js'
     ],
