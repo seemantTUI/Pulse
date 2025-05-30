@@ -30,7 +30,7 @@ export default function useRuleBreachLogs(ruleId: string) {
             setLoading(true);
             try {
                 const res = await fetch(
-                    `http://localhost:4000/api/v1/rule-breach-logs/${ruleId}`,
+                    `${process.env.NEXT_PUBLIC_API_URL}/rule-breach-logs/${ruleId}`,
                     {
                         headers: {
                             Authorization: `Bearer ${session?.accessToken}`,

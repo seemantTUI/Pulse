@@ -9,8 +9,6 @@ services:
       - ./backend/.env
     volumes:
       - ./backend:/app
-    depends_on:
-      - frontend
 
   frontend:
     build: ./frontend
@@ -18,6 +16,8 @@ services:
       - "3000:3000"
     stdin_open: true
     tty: true
+    env_file:
+      - ./frontend/.env
     volumes:
       - ./frontend:/app
     environment:

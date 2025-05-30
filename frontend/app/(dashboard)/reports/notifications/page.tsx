@@ -17,7 +17,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DataGrid } from '@mui/x-data-grid';
 import {
-    BarChart, Bar, LineChart, Line, XAxis, YAxis,
+    AreaChart, Area, LineChart, Line, XAxis, YAxis,
     Tooltip as RechartsTooltip, ResponsiveContainer, Legend, CartesianGrid
 } from 'recharts';
 
@@ -29,7 +29,7 @@ const presetRanges = [
     { label: 'Last 30d', value: 30 }
 ];
 const chartTypes = [
-    { value: 'bar', label: 'Bar' },
+    { value: 'area', label: 'Area' },
     { value: 'line', label: 'Line' }
 ];
 
@@ -49,7 +49,7 @@ export default function NotificationReportsPage() {
     const [startDate, setStartDate] = useState<Dayjs | null>(null);
     const [endDate, setEndDate] = useState<Dayjs | null>(null);
     const [presetRange, setPresetRange] = useState<number | "">("");
-    const [chartType, setChartType] = useState('bar');
+    const [chartType, setChartType] = useState('area');
 
     // --- Preset range logic ---
     const handlePresetRange = (days: number) => {
@@ -113,16 +113,24 @@ export default function NotificationReportsPage() {
             );
         }
 
-        if (chartType === "bar") {
+        if (chartType === "area") {
             return (
-                <BarChart data={dailyCounts}>
+                <AreaChart data={dailyCounts}>
                     <XAxis dataKey="date" />
                     <YAxis allowDecimals={false} />
                     <CartesianGrid strokeDasharray="3 3" />
                     <RechartsTooltip />
                     <Legend />
-                    <Bar dataKey="count" name="Notifications" fill="#1976d2" />
-                </BarChart>
+                    <Area
+                        type="monotone"
+                        dataKey="count"
+                        name="Notifications"
+                        stroke="#1976d2"
+                        fill="#1976d2"
+                        fillOpacity={0.15}
+                        strokeWidth={2}
+                    />
+                </AreaChart>
             );
         }
         if (chartType === "line") {

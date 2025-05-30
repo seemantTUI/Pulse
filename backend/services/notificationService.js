@@ -10,27 +10,24 @@ const triggerNotification = async (rule, value) => {
         return;
     }
 
+    // If single string (old data), convert to array
+    const channels = Array.isArray(user.notificationChannel)
+        ? user.notificationChannel
+        : [user.notificationChannel];
+
     const message = rule.alertMessage || `Alert! ${rule.metric.metricName} breached threshold with value ${value}.`;
 
-    try {
-        switch (user.notificationChannel) {
-            case 'email':
-                if (user.email) await sendEmailNotification(user.email, message);
-                break;
-
-            case 'sms':
-                if (user.phone) await sendSMSNotification(user.phone, message);
-                break;
-
-            case 'webhook':
-                if (user.webhookUrl) await sendWebhookNotification(user.webhookUrl, message);
-                break;
-
-            default:
-                console.warn(`Unknown notification channel: ${rule.notificationChannel}`);
+    for (const channel of channels) {
+        try {
+            if (channel === 'email' && user.email) {
+                await sendEmailNotification(user.email, message);
+            }
+            if (channel === 'sms' && user.telephone) {
+                await sendSMSNotification(user.telephone, message);
+            }
+        } catch (err) {
+            console.error(`Failed to send ${channel} notification:`, err.message);
         }
-    } catch (err) {
-        console.error(`Failed to send ${rule.notificationChannel} notification:`, err.message);
     }
 };
 
@@ -62,11 +59,6 @@ const sendSMSNotification = async (phone, message) => {
     });
 
     console.log(`📱 SMS sent to ${phone}`);
-};
-
-const sendWebhookNotification = async (webhookUrl, message) => {
-    await axios.post(webhookUrl, { message });
-    console.log(`🌐 Webhook triggered at ${webhookUrl}`);
 };
 
 module.exports = { triggerNotification };

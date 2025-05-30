@@ -88,7 +88,7 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
         if (!validateInputs()) return;
 
         try {
-            const res = await axios.post('http://localhost:4000/api/v1/auth/register', {
+            const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/register`, {
                 name,
                 email,
                 password,

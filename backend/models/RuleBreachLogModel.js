@@ -11,10 +11,6 @@ const RuleBreachLogSchema = new mongoose.Schema({
         ref: 'User',
         required: true,
     },
-    value: {
-        type: Number,
-        required: true,
-    },
     triggeredAt: {
         type: Date,
         default: Date.now,

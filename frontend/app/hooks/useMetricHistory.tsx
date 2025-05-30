@@ -27,7 +27,7 @@ export default function useMetricHistory(metricId: string) {
             setLoading(true);
             try {
                 const res = await axios.get(
-                    `http://localhost:4000/api/v1/metric-logs/${metricId}`,
+                    `${process.env.NEXT_PUBLIC_API_URL}/metric-logs/${metricId}`,
                     {
                         headers: {
                             Authorization: `Bearer ${session?.accessToken}`,

@@ -25,38 +25,51 @@ export default function MetricsPage() {
     const [pendingDeleteId, setPendingDeleteId] = React.useState<string | null>(null);
     const [snackbarMsg, setSnackbarMsg] = React.useState<string | null>(null);
 
+    const isMounted = React.useRef(true);
+
+    React.useEffect(() => {
+        isMounted.current = true;
+        return () => { isMounted.current = false; };
+    }, []);
+
     const handleAdd = () => router.push('/metrics/add');
     const handleEdit = (id: string) => router.push(`/metrics/add?id=${id}`);
 
-    const toggleSelect = (id: string) =>
+    const toggleSelect = React.useCallback((id: string) => {
         setSelectedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+    }, []);
 
-    const confirmDelete = (id: string) => {
+    const confirmDelete = React.useCallback((id: string) => {
         setPendingDeleteId(id);
         setConfirmOpen(true);
-    };
+    }, []);
 
-    const handleBulkDelete = () => {
+    const handleBulkDelete = React.useCallback(() => {
         setPendingDeleteId(null);
         setConfirmOpen(true);
-    };
+    }, []);
 
-    const executeDelete = async () => {
+    const executeDelete = React.useCallback(async () => {
         if (pendingDeleteId) {
             await deleteMetric(pendingDeleteId);
-            setSnackbarMsg('Metric deleted');
+            if (isMounted.current) setSnackbarMsg('Metric deleted');
         } else if (selectedIds.length) {
             for (const id of selectedIds) {
                 await deleteMetric(id);
             }
-            setSnackbarMsg(`${selectedIds.length} metric(s) deleted`);
-            setSelectedIds([]);
+            if (isMounted.current) {
+                setSnackbarMsg(`${selectedIds.length} metric(s) deleted`);
+                setSelectedIds([]);
+            }
         }
-        setPendingDeleteId(null);
-        setConfirmOpen(false);
-    };
+        if (isMounted.current) {
+            setPendingDeleteId(null);
+            setConfirmOpen(false);
+        }
+    }, [pendingDeleteId, selectedIds, deleteMetric]);
 
-    const selectCol: GridColDef = {
+    // --- Memoize selectCol and columns ---
+    const selectCol: GridColDef = React.useMemo(() => ({
         field: 'select',
         headerName: '',
         width: 50,
@@ -80,7 +93,7 @@ export default function MetricsPage() {
                 onChange={() => toggleSelect(String(row.id))}
             />
         ),
-    };
+    }), [selectedIds, rows, toggleSelect]);
 
     const actionsCol: GridColDef = React.useMemo(
         () => ({
@@ -105,7 +118,13 @@ export default function MetricsPage() {
                 </Box>
             ),
         }),
-        [handleEdit]
+        [handleEdit, confirmDelete]
+    );
+
+    // --- Memoize columns array ---
+    const columns = React.useMemo(
+        () => [selectCol, ...baseCols, actionsCol],
+        [selectCol, baseCols, actionsCol]
     );
 
     return (
@@ -138,7 +157,7 @@ export default function MetricsPage() {
             <Box mb={2}>
                 <CustomDataGrid
                     rows={rows}
-                    columns={[selectCol, ...baseCols, actionsCol]}
+                    columns={columns}
                     loading={loading}
                     autoHeight
                 />

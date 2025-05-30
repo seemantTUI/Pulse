@@ -55,7 +55,7 @@ export default function ImportPage() {
         const formData = await importFile.text();
 
         try {
-            const res = await fetch(`http://localhost:4000/api/v1/import?type=${dataType}`, {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/import?type=${dataType}`, {
                 method: 'POST',
                 headers: {
                     Authorization: `Bearer ${session.accessToken}`,

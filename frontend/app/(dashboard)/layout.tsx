@@ -10,18 +10,6 @@ export default function Layout(props: { children: React.ReactNode }) {
   const params = useParams();
   const [employeeId] = params.segments ?? [];
 
-  const title = React.useMemo(() => {
-    if (pathname === '/employees/new') {
-      return 'New Employee';
-    }
-    if (employeeId && pathname.includes('/edit')) {
-      return `Employee ${employeeId} - Edit`;
-    }
-    if (employeeId) {
-      return `Employee ${employeeId}`;
-    }
-    return undefined;
-  }, [employeeId, pathname]);
 
   return (
     <DashboardLayout
@@ -30,7 +18,7 @@ export default function Layout(props: { children: React.ReactNode }) {
         sidebarFooter: SidebarFooterAccount,
       }}
     >
-      <PageContainer title={title}>
+      <PageContainer>
         {props.children}
       </PageContainer>
     </DashboardLayout>

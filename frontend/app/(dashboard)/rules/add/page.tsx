@@ -94,8 +94,8 @@ export default function AddEditRulePage() {
         };
 
         const url = id
-            ? `http://localhost:4000/api/v1/rules/${id}`
-            : 'http://localhost:4000/api/v1/rules';
+            ? `${process.env.NEXT_PUBLIC_API_URL}/rules/${id}`
+            : `${process.env.NEXT_PUBLIC_API_URL}/rules`;
 
         const method = id ? 'PUT' : 'POST';
 

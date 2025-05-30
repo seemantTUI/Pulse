@@ -8,8 +8,6 @@ const { parseDuration } = require('../utils/parseDuration');
 const SUPPORTED_FUNCTIONS = {
   '+': (args) => args.reduce((a, b) => a + b),
   '-': (args) => args.reduce((a, b) => a - b),
-  '*': (args) => args.reduce((a, b) => a * b),
-  '/': (args) => args.reduce((a, b) => a / b),
   'abs': ([val]) => Math.abs(val),
 };
 
@@ -133,7 +131,6 @@ const evaluateRules = async () => {
           await RuleBreachLog.create({
             ruleId: rule._id,
             user: rule.user?._id,
-            value: null, // No single value anymore
             triggeredAt: now,
           });
 
@@ -146,7 +143,7 @@ const evaluateRules = async () => {
           await notification.save();
           await triggerNotification(rule, null); // Metric value not relevant anymore
 
-          rule.isArmed = false;
+          //rule.isArmed = false;
           rule.lastTriggeredAt = now;
           await rule.save();
 

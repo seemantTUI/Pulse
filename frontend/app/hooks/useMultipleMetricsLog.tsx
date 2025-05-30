@@ -29,7 +29,7 @@ export default function useMultipleMetricHistories(metricIds: string[]) {
                 // Fetch logs for all metricIds in parallel
                 const results = await Promise.all(
                     metricIds.map(id =>
-                        axios.get(`http://localhost:4000/api/v1/metric-logs/${id}`, {
+                        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/metric-logs/${id}`, {
                             headers: {
                                 Authorization: `Bearer ${session?.accessToken}`,
                             }

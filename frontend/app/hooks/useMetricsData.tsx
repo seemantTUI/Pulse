@@ -1,6 +1,4 @@
-'use client';
-
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { useSession } from 'next-auth/react';
 import type { GridColDef } from '@mui/x-data-grid';
 
@@ -14,18 +12,25 @@ export default function useMetricsData() {
     const [metrics, setMetrics] = useState<Metric[]>([]);
     const [loading, setLoading] = useState(true);
     const { data: session, status } = useSession();
+    const abortRef = useRef<AbortController | null>(null);
 
     const fetchMetrics = useCallback(async () => {
         if (status !== 'authenticated' || !session?.accessToken) return;
 
         setLoading(true);
+        abortRef.current?.abort(); // Abort previous request
+        const controller = new AbortController();
+        abortRef.current = controller;
+
         try {
-            const res = await fetch('http://localhost:4000/api/v1/metrics/', {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/metrics`, {
                 headers: {
                     Authorization: `Bearer ${session.accessToken}`,
                 },
+                signal: controller.signal
             });
 
+            if (!res.ok) throw new Error('Failed to fetch');
             const data = await res.json();
 
             const items: Metric[] = Array.isArray(data)
@@ -36,23 +41,20 @@ export default function useMetricsData() {
 
             setMetrics(items);
         } catch (err) {
-            console.error('Error fetching metrics:', err);
-            setMetrics([]);
+            if ((err as any).name !== 'AbortError') {
+                setMetrics([]);
+            }
         } finally {
             setLoading(false);
         }
     }, [session?.accessToken, status]);
 
     useEffect(() => {
-        let isMounted = true;
         if (status === 'authenticated') {
-            fetchMetrics().then(() => {
-                if (!isMounted) setLoading(false);
-            });
+            fetchMetrics();
         }
-
         return () => {
-            isMounted = false;
+            abortRef.current?.abort();
         };
     }, [fetchMetrics, status]);
 
@@ -61,7 +63,7 @@ export default function useMetricsData() {
             if (status !== 'authenticated' || !session?.accessToken) return;
 
             try {
-                const res = await fetch(`http://localhost:4000/api/v1/metrics/${id}`, {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/metrics/${id}`, {
                     method: 'DELETE',
                     headers: {
                         Authorization: `Bearer ${session.accessToken}`,
@@ -72,18 +74,15 @@ export default function useMetricsData() {
                     setMetrics((prev) => prev.filter((m) => m._id !== id));
                 }
             } catch {
-                console.error('Error deleting metric');
+                // do nothing
             }
         },
         [session?.accessToken, status]
     );
 
-    const rows = metrics.map((m) => ({
-        ...m,
-        id: m._id,
-    }));
+    const rows = useMemo(() => metrics.map((m) => ({ ...m, id: m._id })), [metrics]);
 
-    const columns: GridColDef[] = [
+    const columns: GridColDef[] = useMemo(() => [
         {
             field: 'metricName',
             headerName: 'Metric Name',
@@ -97,7 +96,7 @@ export default function useMetricsData() {
             flex: 1,
             minWidth: 120,
         },
-    ];
+    ], []);
 
     return { rows, columns, loading, deleteMetric, refetch: fetchMetrics };
 }

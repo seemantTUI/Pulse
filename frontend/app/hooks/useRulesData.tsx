@@ -32,7 +32,8 @@ export default function useRulesData() {
 
         (async () => {
             try {
-                const res = await fetch('http://localhost:4000/api/v1/rules', {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/rules`, {
+
                     headers: getAuthHeaders(session?.accessToken),
                 });
                 const data = await res.json();
@@ -67,7 +68,7 @@ export default function useRulesData() {
     const armRule = useCallback(
         async (id: string) => {
             try {
-                const res = await fetch(`http://localhost:4000/api/v1/rules/${id}/arm`, {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/rules/${id}/arm`, {
                     method: 'PATCH',
                     headers: getAuthHeaders(session?.accessToken),
                 });
@@ -82,7 +83,7 @@ export default function useRulesData() {
     const disarmRule = useCallback(
         async (id: string) => {
             try {
-                const res = await fetch(`http://localhost:4000/api/v1/rules/${id}/disarm`, {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/rules/${id}/disarm`, {
                     method: 'PATCH',
                     headers: getAuthHeaders(session?.accessToken),
                 });
@@ -97,7 +98,7 @@ export default function useRulesData() {
     const armRules = useCallback(
         async (ids: string[]) => {
             try {
-                const res = await fetch('http://localhost:4000/api/v1/rules/bulk-arm', {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/rules/bulk-arm`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -116,7 +117,7 @@ export default function useRulesData() {
     const disarmRules = useCallback(
         async (ids: string[]) => {
             try {
-                const res = await fetch('http://localhost:4000/api/v1/rules/bulk-disarm', {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/rules/bulk-disarm`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -135,7 +136,7 @@ export default function useRulesData() {
     const deleteRule = useCallback(
         async (id: string) => {
             try {
-                const res = await fetch(`http://localhost:4000/api/v1/rules/${id}`, {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/rules/${id}`, {
                     method: 'DELETE',
                     headers: getAuthHeaders(session?.accessToken),
                 });
@@ -152,7 +153,7 @@ export default function useRulesData() {
     const getRuleById = useCallback(
         async (id: string) => {
             try {
-                const res = await fetch(`http://localhost:4000/api/v1/rules/${id}`, {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/rules/${id}`, {
                     headers: getAuthHeaders(session?.accessToken),
                 });
                 if (!res.ok) throw new Error('Failed to fetch rule');
@@ -169,7 +170,7 @@ export default function useRulesData() {
         async (ids: string[]) => {
             if (!ids.length) return;
             try {
-                const res = await fetch('http://localhost:4000/api/v1/rules/bulk-delete', {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/rules/bulk-delete`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

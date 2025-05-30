@@ -44,6 +44,6 @@ router.get('/', protect, getRuleBreachLogs);
  *       200:
  *         description: List of breach logs for a specific rule
  */
-//router.get('/:ruleId', protect, getRuleBreachLogsByRuleId);
+router.get('/:ruleId', protect, getRuleBreachLogsByRuleId);
 
 module.exports = router;

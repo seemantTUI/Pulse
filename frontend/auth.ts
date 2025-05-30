@@ -20,7 +20,7 @@ const providers: Provider[] = [
         },
         async authorize(credentials, req) {
             try {
-                const res = await fetch('http://localhost:4000/api/v1/auth/login', {
+                const res = await fetch('http://backend:4000/api/v1/auth/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(credentials),

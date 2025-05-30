@@ -23,7 +23,7 @@ export default function useNotificationsData() {
 
         (async () => {
             try {
-                const res = await fetch('http://localhost:4000/api/v1/notifications/', {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/notifications/`, {
                     headers: {
                         Authorization: `Bearer ${session?.accessToken}`,
                     },

@@ -56,7 +56,7 @@ export default function ExportPage() {
         if (filters.endDate) params.set('endDate', filters.endDate);
         if (dataType === 'rules') params.set('isArmed', String(filters.isArmed));
 
-        const url = `http://localhost:4000/api/v1/export?type=${dataType}&${params.toString()}`;
+        const url = `${process.env.NEXT_PUBLIC_API_URL}/export?type=${dataType}&${params.toString()}`;
 
         try {
             const res = await fetch(url, {

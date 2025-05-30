@@ -32,7 +32,7 @@ export default function AddEditMetricPage() {
     useEffect(() => {
         if (!id || !accessToken) return;
 
-        fetch(`http://localhost:4000/api/v1/metrics/${id}`, {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/metrics/${id}`, {
             headers: {
                 Authorization: `Bearer ${accessToken}`,
             },
@@ -59,8 +59,9 @@ export default function AddEditMetricPage() {
 
         const payload = { metricName: name, value };
         const url = id
-            ? `http://localhost:4000/api/v1/metrics/${id}`
-            : 'http://localhost:4000/api/v1/metrics';
+            ? `${process.env.NEXT_PUBLIC_API_URL}/metrics/${id}`
+            : `${process.env.NEXT_PUBLIC_API_URL}/metrics`;
+
         const method = id ? 'PUT' : 'POST';
 
         try {

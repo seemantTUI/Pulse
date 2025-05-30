@@ -55,7 +55,7 @@ export default function EditProfilePage() {
 
         (async () => {
             try {
-                const res = await axios.get('http://localhost:4000/api/v1/auth/me', {
+                const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/auth/me`, {
                     headers: { Authorization: `Bearer ${accessToken}` },
                 });
                 const user = res.data;
@@ -137,7 +137,7 @@ export default function EditProfilePage() {
             }
 
             await axios.put(
-                'http://localhost:4000/api/v1/auth/me',
+                `${process.env.NEXT_PUBLIC_API_URL}/auth/me`,
                 dataToSend,
                 { headers }
             );
@@ -177,7 +177,7 @@ export default function EditProfilePage() {
 
         try {
             await axios.post(
-                'http://localhost:4000/api/v1/auth/change-password',
+                `${process.env.NEXT_PUBLIC_API_URL}/auth/change-password`,
                 { oldPassword, newPassword },
                 {
                     headers: {

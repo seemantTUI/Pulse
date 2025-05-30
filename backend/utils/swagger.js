@@ -5,18 +5,18 @@ const options = {
     definition: {
         openapi: '3.0.0',
         info: {
-            title: 'WatchTower API',
+            title: 'Pulse API',
             version: '1.0.0',
-            description: 'API documentation for WatchTower Monitoring System',
+            description: 'API documentation for Pulse Alert System',
         },
         servers: [
             {
-                url: 'http://localhost:4000/api/v1',
+                url: `${process.env.APP_URL}/api/v1`,
                 description: 'Main API Server',
             },
             {
-                url: 'http://localhost:4000',
-                description: 'Webhook Server (Public endpoints)',
+                url: `${process.env.APP_URL}`,
+                // ...
             },
         ],
         components: {

@@ -1,6 +1,7 @@
 // controllers/ruleController.js
 const Rule = require('../models/ruleModel');
 const mongoose = require('mongoose');
+const appEvents = require('../events'); // <-- fix import path if needed!
 
 // GET /rules
 const getRules = async (req, res) => {
@@ -71,6 +72,7 @@ const createRule = async (req, res) => {
             retriggerAfter,
             user: req.user._id,
         });
+        appEvents.emit('dataChanged'); // <-- Trigger evaluation!
         res.status(201).json(rule);
     } catch (err) {
         res.status(400).json({ error: err.message });
@@ -103,6 +105,7 @@ const createRules = async (req, res) => {
 
     try {
         const created = await Rule.insertMany(valid);
+        appEvents.emit('dataChanged'); // <-- Trigger evaluation!
         res.status(201).json({ message: 'Rules created', created });
     } catch (err) {
         res.status(400).json({ error: err.message });
@@ -130,6 +133,7 @@ const updateRule = async (req, res) => {
         if (!rule) {
             return res.status(404).json({ error: `Rule with ID ${id} not found or not authorized` });
         }
+        appEvents.emit('dataChanged'); // <-- Trigger evaluation!
         res.status(200).json(rule);
     } catch (err) {
         res.status(400).json({ error: err.message });

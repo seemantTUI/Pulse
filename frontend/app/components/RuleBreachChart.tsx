@@ -13,7 +13,7 @@ import {
   Box,
 } from '@mui/material';
 import { LineChart } from '@mui/x-charts/LineChart';
-import useRulesData from '../hooks/useRulesData'; // <-- Import your hook
+import useRulesData from '../hooks/useRulesData';
 import useRuleBreachLogs from '../hooks/useRuleBreachLogs';
 
 interface Rule {
@@ -22,14 +22,12 @@ interface Rule {
 }
 
 export default function RuleBreachChart() {
-  const { rows: ruleRows = [], loading: rulesLoading } = useRulesData(); // <-- Use the hook
+  const { rows: ruleRows = [], loading: rulesLoading } = useRulesData();
   const [selectedRuleId, setSelectedRuleId] = useState<string>('');
   const initRef = useRef(false);
 
-  // Set rules from hook (no axios)
   const rules: Rule[] = ruleRows;
 
-  // Set initial selected rule once rules load
   useEffect(() => {
     if (rules.length > 0 && !initRef.current) {
       initRef.current = true;
@@ -37,37 +35,32 @@ export default function RuleBreachChart() {
     }
   }, [rules]);
 
-  // Fetch breach logs whenever ruleId changes
   const { logs, loading } = useRuleBreachLogs(selectedRuleId);
 
-  // Prepare last-24h buckets
+  // Prepare 24 hour buckets (hour label: count)
   const now = Date.now();
-  const buckets: Record<string, number[]> = {};
-  for (let h = 0; h < 24; h++) buckets[`${h}:00`] = [];
+  const buckets: Record<string, number> = {};
+  for (let h = 0; h < 24; h++) buckets[`${h}:00`] = 0;
 
   logs.forEach((log) => {
     const t = new Date(log.triggeredAt).getTime();
     const deltaH = Math.floor((now - t) / 3_600_000);
     if (deltaH < 24) {
       const hr = new Date(log.triggeredAt).getHours();
-      buckets[`${hr}:00`].push(log.value);
+      buckets[`${hr}:00`] += 1;
     }
   });
 
-  const labels: string[] = [];
-  const values: number[] = [];
-  Object.entries(buckets).forEach(([hour, arr]) => {
-    labels.push(hour);
-    const avg = arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
-    values.push(parseFloat(avg.toFixed(2)));
-  });
+  // X axis (hours), Y axis (counts)
+  const labels: string[] = Object.keys(buckets);
+  const values: number[] = Object.values(buckets);
 
-  const nonZero = values.filter((v) => v > 0);
-  const avg = nonZero.length
-      ? (nonZero.reduce((a, b) => a + b, 0) / nonZero.length).toFixed(2)
-      : '-';
-  const min = nonZero.length ? Math.min(...nonZero).toFixed(2) : '-';
-  const max = nonZero.length ? Math.max(...nonZero).toFixed(2) : '-';
+  const totalBreaches = logs.filter((log) => (now - new Date(log.triggeredAt).getTime()) < 24 * 3600_000).length;
+  const lastBreach = logs.length
+      ? new Date(
+          Math.max(...logs.map((log) => new Date(log.triggeredAt).getTime()))
+      )
+      : null;
 
   return (
       <Card variant="outlined">
@@ -92,18 +85,20 @@ export default function RuleBreachChart() {
           </FormControl>
 
           <Typography variant="subtitle2" gutterBottom>
-            Last 24 Hours
+            Breach Frequency (Last 24 Hours)
           </Typography>
 
           <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
             <Typography variant="body2" color="text.secondary">
-              Avg: <b>{avg}</b>
+              Total breaches: <b>{totalBreaches}</b>
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Min: <b>{min}</b>
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Max: <b>{max}</b>
+              Last breach:{' '}
+              <b>
+                {lastBreach
+                    ? lastBreach.toLocaleString()
+                    : '-'}
+              </b>
             </Typography>
           </Stack>
 
@@ -114,7 +109,7 @@ export default function RuleBreachChart() {
           ) : (
               <LineChart
                   height={280}
-                  series={[{ data: values }]}
+                  series={[{ data: values, label: 'Breaches' }]}
                   xAxis={[{ scaleType: 'band', data: labels }]}
                   grid={{ horizontal: true }}
                   margin={{ left: 50, right: 10, top: 20, bottom: 40 }}
