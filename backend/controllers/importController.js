@@ -109,17 +109,17 @@ const importData = async (req, res) => {
 
         const userId = req.user._id;
 
+        // Only add user for rules, NOT for metrics
         const cleanedData = rawData.map(item => {
-            const doc = { ...item, user: userId };
+            let doc = { ...item };
+            if (type === 'rules') doc.user = userId;
 
             if (type === 'metrics' && typeof doc.value === 'string') {
                 doc.value = parseFloat(doc.value);
             }
-
             if (type === 'rules' && typeof doc.isArmed === 'string') {
                 doc.isArmed = doc.isArmed.toLowerCase() === 'true';
             }
-
             return doc;
         });
 
@@ -134,10 +134,14 @@ const importData = async (req, res) => {
             await doc.validate();
         }
 
+        // --------- DUPLICATE CHECK --------------
         for (const doc of docs) {
-            const query = { user: userId };
-            if (type === 'rules') query.ruleName = doc.ruleName;
-            if (type === 'metrics') query.metricName = doc.metricName;
+            let query;
+            if (type === 'rules') {
+                query = { user: userId, ruleName: doc.ruleName };
+            } else if (type === 'metrics') {
+                query = { metricName: doc.metricName };
+            }
 
             const exists = await modelMap[type].findOne(query);
             if (exists) {
@@ -146,6 +150,7 @@ const importData = async (req, res) => {
                 });
             }
         }
+        // -----------------------------------------
 
         await modelMap[type].insertMany(cleanedData);
         res.status(200).json({ message: `${type} imported successfully`, count: cleanedData.length });

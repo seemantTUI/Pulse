@@ -55,11 +55,9 @@ const ExpressionSchema = new Schema({
     // aggregator (cumulative logic)
     aggregator: {
         type: String,
-        enum: ['ANY', 'ALL', 'AT_LEAST', 'AT_MOST', 'EXACTLY'],
+        enum: ['ANY', 'ALL'],
     },
-    threshold: {
-        type: Number, // Only used for AT_LEAST, AT_MOST, EXACTLY
-    },
+
 
     // rule reference
     ruleRef: {

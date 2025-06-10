@@ -17,9 +17,6 @@ export default function AggregatorNode({ node, onChange, metrics, readOnly }: an
     const handleAggregatorChange = (e: any) => {
         const agg = e.target.value;
         const updated = { ...node, aggregator: agg };
-        if (agg !== 'EXACTLY') {
-            delete updated.exactCount;
-        }
         onChange(updated);
     };
 

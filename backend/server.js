@@ -1,53 +1,11 @@
 require('dotenv').config();
-
-const express = require('express')
-const mongoose = require('mongoose')
-const cors = require('cors');
-const rulesRoutes = require('./routes/rules'); 
-const metricRoutes = require('./routes/metrics'); 
-const notificationRoutes = require('./routes/notifications');
+const mongoose = require('mongoose');
+const app = require('./app'); // Import your now-complete app
 const { evaluateRules } = require('./services/alertEngine');
-const webhooksRoutes = require('./routes/webhooks');
 const fetchWeatherData  = require('./services/fetchMetricService');
-const authRoutes = require('./routes/auth');
-const protect = require('./middleware/authMiddleware');
-const googleRoutes = require('./routes/googleauth');
-const metricLogsRoutes = require('./routes/metricLogs')
-const ruleBreachLogRoutes = require('./routes/ruleBreachLog');
-const exportRoutes = require('./routes/exportRoutes');
-const importRoutes = require('./routes/importRoutes');
 const appEvents = require('./events');
 
-
-
-const app = express()
-app.use(cors({
-    origin: [
-        'http://localhost:3000',  // for local development
-        'http://frontend:3000'    // for Docker Compose
-    ]
-}));
-app.use(express.json())
-
-app.use((req, res, next) => {
-    console.log(req.path, req.method)
-    next()
-  })
-
-app.use('/api/v1/rules', protect, rulesRoutes);
-app.use('/api/v1/metrics', protect, metricRoutes);
-app.use('/api/v1/notifications', protect, notificationRoutes);
-app.use('/webhooks', webhooksRoutes);
-app.use('/api/v1/auth', authRoutes);
-app.use('/api/v1/google', googleRoutes);
-app.use('/api/v1/metric-logs',protect, metricLogsRoutes);
-app.use('/api/v1/rule-breach-logs', protect, ruleBreachLogRoutes);
-app.use('/api/v1/export', protect, exportRoutes);
-app.use('/api/v1/import', protect, importRoutes);
-
-
-require('./utils/swagger')(app);
-
+// Start recurring jobs (weather/rule eval)
 setInterval(() => {
     fetchWeatherData();
     evaluateRules();
@@ -57,13 +15,16 @@ appEvents.on('dataChanged', () => {
     console.log('📢 Data changed (rule/metric). Evaluating rules immediately...');
     evaluateRules();
 });
-  
 
-mongoose.connect(process.env.MONGO_URI, {useNewUrlParser: true, useUnifiedTopology: true})
+// Connect to MongoDB and start the server
+mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => {
-        console.log("Connected to database")
+        console.log("Connected to database");
         app.listen(process.env.PORT, () => {
-            console.log(`Server is running on port ${process.env.PORT}`)
-        })
+            console.log(`Server is running on port ${process.env.PORT}`);
+        });
     })
-
+    .catch(err => {
+        console.error('DB connection failed', err);
+        process.exit(1);
+    });

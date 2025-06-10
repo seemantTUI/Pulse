@@ -11,6 +11,7 @@ import {
     Card,
     CardContent,
     useTheme,
+    Grid,
 } from '@mui/material';
 import ExpressionBuilder from '../../../components/ExpressionBuilder';
 import useRulesData from '../../../hooks/useRulesData';
@@ -23,7 +24,7 @@ export default function AddEditRulePage() {
     const copyFrom = searchParams.get('copyFrom');
     const readOnly = searchParams.get('view_only') === 'true';
 
-    const { data: session, status } = useSession();
+    const { data: session } = useSession();
     const accessToken = session?.accessToken;
 
     const { getRuleById } = useRulesData();
@@ -127,6 +128,7 @@ export default function AddEditRulePage() {
                     <Typography variant="h5" gutterBottom>
                         {id ? 'Edit Rule' : copyFrom ? 'Copy Rule' : 'New Rule'}
                     </Typography>
+
                     <Box
                         component="form"
                         onSubmit={readOnly ? (e) => e.preventDefault() : handleSubmit}
@@ -138,100 +140,112 @@ export default function AddEditRulePage() {
                             maxWidth: 400, // limit width for scroll behavior
                         }}
                     >
-                        {/* Rule Name */}
+                        {/* Rule Name – Smaller width */}
                         <TextField
-                            sx={{ width: 320 }}
                             label="Rule Name"
                             value={ruleName}
                             onChange={(e) => setRuleName(e.target.value)}
                             disabled={readOnly}
                             required
-                            margin="normal"
+                            sx={{ width: 300 }}
                         />
-                        {/* Description as textarea */}
+
+                        {/* Description */}
                         <TextField
-                            sx={{
-                                '& .MuiInputBase-root': {
-                                    overflow: 'auto',
-                                },
-                            }}
                             label="Description"
                             value={ruleDesc}
                             onChange={(e) => setRuleDesc(e.target.value)}
                             disabled={readOnly}
-                            margin="normal"
                             multiline
                             minRows={2}
                             maxRows={6}
+                            fullWidth
                             inputProps={{
-                                style: { resize: 'vertical', maxHeight: 160, overflow: 'auto' }
+                                style: { resize: 'vertical', maxHeight: 200 },
                             }}
                         />
 
-                        <Typography variant="subtitle1" mt={2}>
-                            Expression
-                        </Typography>
-                        <Box mt={2} mb={4}>
-                            <ExpressionBuilder
-                                node={expression}
-                                onChange={setExpression}
-                                metrics={metrics}
-                                readOnly={readOnly}
-                            />
+                        {/* Expression Builder */}
+                        <Box width="100%">
+                            <Typography variant="subtitle1" gutterBottom>
+                                Expression
+                            </Typography>
+                            <Box
+                                sx={{
+                                    border: '1px solid #ccc',
+                                    borderRadius: 1,
+                                    p: 2,
+                                    maxHeight: 400,
+                                    overflow: 'auto',
+                                    background: theme.palette.background.paper,
+                                }}
+                            >
+                                <ExpressionBuilder
+                                    node={expression}
+                                    onChange={setExpression}
+                                    metrics={metrics}
+                                    readOnly={readOnly}
+                                />
+                            </Box>
                         </Box>
 
-                        {/* Alert message as textarea */}
+                        {/* Alert Message */}
                         <TextField
-                            sx={{
-                                '& .MuiInputBase-root': {
-                                    overflow: 'auto',
-                                },
-                            }}
                             label="Alert Message"
                             value={alertMessage}
                             onChange={(e) => setAlertMessage(e.target.value)}
                             disabled={readOnly}
                             required
-                            margin="normal"
                             multiline
                             minRows={2}
                             maxRows={6}
+                            fullWidth
                             inputProps={{
-                                style: { resize: 'vertical', maxHeight: 160, overflow: 'auto' }
+                                style: { resize: 'vertical', maxHeight: 200 },
                             }}
                         />
 
-                        <Typography variant="subtitle1" mt={3}>
-                            Retrigger After
-                        </Typography>
-                        <Box display="flex" gap={2} mt={1}>
-                            <TextField
-                                type="number"
-                                label="Days"
-                                value={retriggerDays}
-                                onChange={(e) => setRetriggerDays(Number(e.target.value))}
-                                disabled={readOnly}
-                                sx={{ width: 100 }}
-                            />
-                            <TextField
-                                type="number"
-                                label="Hours"
-                                value={retriggerHours}
-                                onChange={(e) => setRetriggerHours(Number(e.target.value))}
-                                disabled={readOnly}
-                                sx={{ width: 100 }}
-                            />
-                            <TextField
-                                type="number"
-                                label="Minutes"
-                                value={retriggerMinutes}
-                                onChange={(e) => setRetriggerMinutes(Number(e.target.value))}
-                                disabled={readOnly}
-                                sx={{ width: 100 }}
-                            />
+                        {/* Retrigger After */}
+                        <Box width="100%">
+                            <Typography variant="subtitle1" gutterBottom>
+                                Retrigger After
+                            </Typography>
+                            <Grid container spacing={2}>
+                                <Grid item xs={4} sm={2}>
+                                    <TextField
+                                        type="number"
+                                        label="Days"
+                                        value={retriggerDays}
+                                        onChange={(e) => setRetriggerDays(Number(e.target.value))}
+                                        disabled={readOnly}
+                                        fullWidth
+                                    />
+                                </Grid>
+                                <Grid item xs={4} sm={2}>
+                                    <TextField
+                                        type="number"
+                                        label="Hours"
+                                        value={retriggerHours}
+                                        onChange={(e) => setRetriggerHours(Number(e.target.value))}
+                                        disabled={readOnly}
+                                        fullWidth
+                                    />
+                                </Grid>
+                                <Grid item xs={4} sm={2}>
+                                    <TextField
+                                        type="number"
+                                        label="Minutes"
+                                        value={retriggerMinutes}
+                                        onChange={(e) => setRetriggerMinutes(Number(e.target.value))}
+                                        disabled={readOnly}
+                                        fullWidth
+                                    />
+                                </Grid>
+                            </Grid>
                         </Box>
 
-                        <Box mt={3} display="flex" gap={2}>
+                        {/* Actions */}
+                        <Box mt={2} display="flex" gap={2}>
                             {!readOnly && (
                                 <Button type="submit" variant="contained" color="primary">
                                     Save
@@ -242,7 +256,7 @@ export default function AddEditRulePage() {
                             </Button>
                         </Box>
 
-                        {error && <Typography color="error" mt={2}>{error}</Typography>}
+                        {error && <Typography color="error">{error}</Typography>}
                     </Box>
                 </CardContent>
             </Card>

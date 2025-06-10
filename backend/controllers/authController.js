@@ -24,12 +24,22 @@ exports.register = async (req, res) => {
         // Only allow 'email' or 'sms'
         notificationChannel = notificationChannel.filter((x) => ['email', 'sms'].includes(x));
 
+        // --- IMPORTANT: SMS requires telephone ---
+        if (
+            Array.isArray(notificationChannel) &&
+            notificationChannel.includes('sms') &&
+            !telephone
+        ) {
+            return res.status(400).json({ msg: "Telephone number is required when notification channel includes SMS." });
+        }
+
         user = new User({
             name,
             email: normalizedEmail,
             password,
             notificationChannel,
-            ...(telephone && notificationChannel.includes('sms') && { telephone }),
+            // Always set telephone if present and sms is included
+            ...(notificationChannel.includes('sms') && { telephone }),
         });
 
         await user.save();
@@ -117,14 +127,23 @@ exports.updateProfile = async (req, res) => {
         notificationChannel = notificationChannel.filter((x) => ['email', 'sms'].includes(x));
     }
 
+    // --- IMPORTANT: SMS requires telephone ---
+    if (
+        Array.isArray(notificationChannel) &&
+        notificationChannel.includes('sms') &&
+        !telephone
+    ) {
+        return res.status(400).json({ msg: "Telephone number is required when notification channel includes SMS." });
+    }
+
     // Build update object
     const updateData = {};
     if (name) updateData.name = name;
     if (notificationChannel) updateData.notificationChannel = notificationChannel;
     if (notificationChannel && notificationChannel.includes('sms')) {
         if (telephone) updateData.telephone = telephone;
-    } else {
-        updateData.telephone = undefined;
+    } else if (notificationChannel) {
+        updateData.telephone = undefined; // Remove telephone if SMS not selected
     }
     if (avatar) updateData.avatar = avatar;
 
