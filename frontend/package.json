@@ -24,7 +24,7 @@
     "date-fns": "^2.29.3",
     "dayjs": "^1.11.13",
     "framer-motion": "^12.15.0",
-    "next": "^15",
+    "next": "^15.3.3",
     "next-auth": "^5.0.0-beta.25",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

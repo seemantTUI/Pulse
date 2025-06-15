@@ -1,24 +1,63 @@
-version: '3.9'
+# docker-compose.yml
+version: "3.8"
 
 services:
   backend:
-    build: ./backend
-    ports:
-      - "4000:4000"
-    env_file:
-      - ./backend/.env
+    # Build context for the backend service, assuming your backend files are in a 'backend' directory
+    build:
+      context: ./backend
+      dockerfile: dockerfile # Refers to backend/Dockerfile
+    # Mount the host's backend directory into the container's /app directory.
+    # The - /app/node_modules entry is CRUCIAL. It creates an anonymous volume
+    # for node_modules *inside* the container, ensuring that the npm install
+    # executed within the Dockerfile persists and isn't overwritten by potentially
+    # empty or incompatible node_modules from your host machine.
     volumes:
       - ./backend:/app
+      - /app/node_modules # Prevents host's node_modules from overwriting container's
+    # Map container port 4000 to host port 4000.
+    # Ensure your Express backend server inside `server.js` is configured to listen on port 4000.
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=development
+      # Add any other backend-specific environment variables here (e.g., MONGODB_URI)
+      # - MONGODB_URI=mongodb://mongodb:27017/yourdb
+    # If your backend relies on other services (like a database), specify them here.
+    # depends_on:
+    #   - mongodb # Uncomment if you have a mongodb service
 
   frontend:
-    build: ./frontend
-    ports:
-      - "3000:3000"
-    stdin_open: true
-    tty: true
-    env_file:
-      - ./frontend/.env
+    # Build context for the frontend service, assuming your frontend files are in a 'frontend' directory
+    build:
+      context: ./frontend
+      dockerfile: dockerfile # Refers to frontend/Dockerfile
+    # Similar volume mounting strategy for the frontend to ensure node_modules are correct
     volumes:
       - ./frontend:/app
+      - /app/node_modules # Prevents host's node_modules from overwriting container's
+    # Map container port 3000 to host port 3000, default for Next.js dev server
+    ports:
+      - "3000:3000"
     environment:
-      - CHOKIDAR_USEPOLLING=true
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true # Often helpful for Next.js hot-reloading in Docker environments (especially on Windows/macOS)
+      # Important: If your frontend needs to communicate with the backend,
+      # use the service name 'backend' and its internal port, not 'localhost'.
+      # For example, if your backend runs on port 4000 inside its container:
+    # The frontend depends on the backend, so ensure backend starts first
+    depends_on:
+      - backend
+
+  # Example MongoDB service (uncomment and configure if you need a database)
+  # mongodb:
+  #   image: mongo:latest
+  #   container_name: mongodb
+  #   ports:
+  #     - "27017:27017"
+  #   volumes:
+  #     - mongo_data:/data/db # Named volume for persistent data
+
+# Define named volumes if you use them (e.g., for database persistence)
+# volumes:
+#   mongo_data:
